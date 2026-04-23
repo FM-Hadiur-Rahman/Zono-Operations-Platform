@@ -10,7 +10,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import notFoundMiddleware from "./middlewares/notFoundMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
-
+import platformRoutes from "./routes/platformRoutes.js";
+import platformSetupRoutes from "./routes/platformSetupRoutes.js";
 const app = express();
 
 app.use(
@@ -41,6 +42,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/catalog", catalogSetupRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/platform", platformRoutes);
+app.use("/api/setup", platformSetupRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

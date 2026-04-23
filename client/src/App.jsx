@@ -10,7 +10,10 @@ import OrdersPage from "./pages/orders/OrdersPage";
 import OwnerLocationsPage from "./pages/owner/OwnerLocationsPage";
 import OwnerSuppliersPage from "./pages/owner/OwnerSuppliersPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
-
+import PlatformDashboardPage from "./pages/platform/PlatformDashboardPage";
+import PlatformCompaniesPage from "./pages/platform/PlatformCompaniesPage";
+import CreateCompanyPage from "./pages/platform/CreateCompanyPage";
+import OwnerUsersPage from "./pages/owner/OwnerUsersPage";
 export default function App() {
   return (
     <Routes>
@@ -88,12 +91,46 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/owner/users"
+        element={
+          <ProtectedRoute roles={["owner"]}>
+            <OwnerUsersPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/owner/orders"
         element={
           <ProtectedRoute roles={["owner"]}>
             <OwnerOrdersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/platform/dashboard"
+        element={
+          <ProtectedRoute roles={["platform_admin"]}>
+            <PlatformDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/platform/companies"
+        element={
+          <ProtectedRoute roles={["platform_admin"]}>
+            <PlatformCompaniesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/platform/companies/new"
+        element={
+          <ProtectedRoute roles={["platform_admin"]}>
+            <CreateCompanyPage />
           </ProtectedRoute>
         }
       />

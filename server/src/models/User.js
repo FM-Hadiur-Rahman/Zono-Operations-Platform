@@ -6,12 +6,18 @@ const userSchema = new mongoose.Schema(
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      required: [true, "Company is required"],
+      default: null,
+      required: function () {
+        return this.role !== "platform_admin";
+      },
     },
     locationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Location",
       default: null,
+      required: function () {
+        return this.role === "manager";
+      },
     },
     name: {
       type: String,
@@ -32,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["owner", "manager"],
+      enum: ["platform_admin", "owner", "manager"],
       default: "manager",
     },
     isActive: {
