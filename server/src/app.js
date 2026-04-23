@@ -13,6 +13,7 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import platformSetupRoutes from "./routes/platformSetupRoutes.js";
 import ownerManagementRoutes from "./routes/ownerManagementRoutes.js";
+import ownerCatalogRoutes from "./routes/ownerCatalogRoutes.js";
 const app = express();
 
 app.use(
@@ -46,6 +47,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/platform", platformRoutes);
 app.use("/api/setup", platformSetupRoutes);
 app.use("/api/owner", ownerManagementRoutes);
+app.use("/api/owner/catalog", ownerCatalogRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
