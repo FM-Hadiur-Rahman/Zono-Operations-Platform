@@ -8,6 +8,7 @@ const navItems = [
   { label: "Dashboard", to: "/owner/dashboard" },
   { label: "Locations", to: "/owner/locations" },
   { label: "Suppliers", to: "/owner/suppliers" },
+  { label: "Products", to: "/owner/products" },
   { label: "Users", to: "/owner/users" },
   { label: "Orders", to: "/owner/orders" },
 ];

@@ -14,6 +14,7 @@ import PlatformDashboardPage from "./pages/platform/PlatformDashboardPage";
 import PlatformCompaniesPage from "./pages/platform/PlatformCompaniesPage";
 import CreateCompanyPage from "./pages/platform/CreateCompanyPage";
 import OwnerUsersPage from "./pages/owner/OwnerUsersPage";
+import OwnerProductsPage from "./pages/owner/OwnerProductsPage";
 export default function App() {
   return (
     <Routes>
@@ -88,6 +89,14 @@ export default function App() {
         element={
           <ProtectedRoute roles={["owner"]}>
             <OwnerSuppliersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/products"
+        element={
+          <ProtectedRoute roles={["owner"]}>
+            <OwnerProductsPage />
           </ProtectedRoute>
         }
       />
