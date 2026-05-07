@@ -12,12 +12,14 @@ const initialForm = {
   unit: "",
   price: "",
   currency: "EUR",
+  image: null,
 };
 
 export default function OwnerProductsPage() {
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [form, setForm] = useState(initialForm);
+  const [preview, setPreview] = useState("");
   const [editingId, setEditingId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,9 +56,23 @@ export default function OwnerProductsPage() {
   }, []);
 
   const handleChange = (e) => {
+    const { name, value, files, type } = e.target;
+
+    if (type === "file") {
+      const file = files?.[0];
+
+      setForm((prev) => ({
+        ...prev,
+        image: file || null,
+      }));
+
+      setPreview(file ? URL.createObjectURL(file) : "");
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -71,7 +87,10 @@ export default function OwnerProductsPage() {
       unit: product.unit || "",
       price: product.price ?? "",
       currency: product.currency || "EUR",
+      image: null,
     });
+
+    setPreview(product.image?.url || "");
     setError("");
     setSuccess("");
   };
@@ -79,6 +98,7 @@ export default function OwnerProductsPage() {
   const resetForm = () => {
     setEditingId("");
     setForm(initialForm);
+    setPreview("");
   };
 
   const handleSubmit = async (e) => {
@@ -91,20 +111,32 @@ export default function OwnerProductsPage() {
 
       const token = getToken();
 
-      const payload = {
-        ...form,
-        price: Number(form.price || 0),
+      const formData = new FormData();
+      formData.append("supplierId", form.supplierId);
+      formData.append("name", form.name);
+      formData.append("sku", form.sku);
+      formData.append("category", form.category);
+      formData.append("description", form.description);
+      formData.append("unit", form.unit);
+      formData.append("price", Number(form.price || 0));
+      formData.append("currency", form.currency);
+
+      if (form.image) {
+        formData.append("image", form.image);
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       };
 
       if (editingId) {
-        await api.put(`/owner/catalog/products/${editingId}`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.put(`/owner/catalog/products/${editingId}`, formData, config);
         setSuccess("Product updated successfully.");
       } else {
-        await api.post("/owner/catalog/products", payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.post("/owner/catalog/products", formData, config);
         setSuccess("Product created successfully.");
       }
 
@@ -156,6 +188,7 @@ export default function OwnerProductsPage() {
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
               required
             />
+
             <input
               type="text"
               name="sku"
@@ -165,6 +198,7 @@ export default function OwnerProductsPage() {
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
               required
             />
+
             <input
               type="text"
               name="category"
@@ -174,6 +208,7 @@ export default function OwnerProductsPage() {
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
               required
             />
+
             <input
               type="text"
               name="unit"
@@ -183,6 +218,7 @@ export default function OwnerProductsPage() {
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
               required
             />
+
             <input
               type="number"
               step="0.01"
@@ -193,6 +229,7 @@ export default function OwnerProductsPage() {
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
               required
             />
+
             <input
               type="text"
               name="currency"
@@ -201,6 +238,37 @@ export default function OwnerProductsPage() {
               placeholder="Currency"
               className="rounded-2xl border border-[#e6d8ca] bg-white px-5 py-4"
             />
+
+            <div className="rounded-2xl border border-[#e6d8ca] bg-white p-4 md:col-span-2">
+              <label className="block text-sm font-semibold text-[#6b5b52]">
+                Product Image
+              </label>
+
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-[#eadccf] bg-[#f7efe8]">
+                  {preview ? (
+                    <img
+                      src={preview}
+                      alt="Product preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold text-[#9a7b5f]">
+                      No Image
+                    </span>
+                  )}
+                </div>
+
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleChange}
+                  className="block w-full text-sm text-[#6b5b52] file:mr-4 file:rounded-xl file:border-0 file:bg-[#2d1c13] file:px-4 file:py-3 file:font-semibold file:text-white"
+                />
+              </div>
+            </div>
+
             <textarea
               name="description"
               value={form.description}
@@ -226,7 +294,7 @@ export default function OwnerProductsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-2xl bg-[linear-gradient(135deg,#2d1c13_0%,#4e342e_100%)] px-6 py-4 font-semibold text-white"
+                className="rounded-2xl bg-[linear-gradient(135deg,#2d1c13_0%,#4e342e_100%)] px-6 py-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving
                   ? "Saving..."
@@ -269,20 +337,36 @@ export default function OwnerProductsPage() {
                   className="rounded-[28px] border border-[#eadccf] bg-white/90 p-5 shadow-sm"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#9a7b5f]">
-                        {product.sku}
-                      </p>
-                      <h3 className="mt-2 text-2xl font-semibold text-[#1f140f]">
-                        {product.name}
-                      </h3>
-                      <p className="mt-2 text-sm text-[#6b5b52]">
-                        {product.category} · {product.unit} · €
-                        {Number(product.price || 0).toFixed(2)}
-                      </p>
-                      <p className="mt-1 text-sm text-[#8b7768]">
-                        Supplier: {product.supplierId?.name || "—"}
-                      </p>
+                    <div className="flex gap-4">
+                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-[#eadccf] bg-[#f7efe8]">
+                        {product.image?.url ? (
+                          <img
+                            src={product.image.url}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-[#9a7b5f]">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#9a7b5f]">
+                          {product.sku}
+                        </p>
+                        <h3 className="mt-2 text-2xl font-semibold text-[#1f140f]">
+                          {product.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-[#6b5b52]">
+                          {product.category} · {product.unit} · €
+                          {Number(product.price || 0).toFixed(2)}
+                        </p>
+                        <p className="mt-1 text-sm text-[#8b7768]">
+                          Supplier: {product.supplierId?.name || "—"}
+                        </p>
+                      </div>
                     </div>
 
                     <button
