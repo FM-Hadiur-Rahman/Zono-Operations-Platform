@@ -138,29 +138,45 @@ export default function ProductsPage() {
                     className="rounded-[28px] border border-[#eadccf] bg-white/90 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(49,31,18,0.08)]"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-xl font-semibold text-[#1f140f]">
-                            {product.name}
-                          </h2>
-                          <span className="rounded-full bg-[#f3e8dc] px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-[#7a5a43]">
-                            {product.category}
-                          </span>
+                      <div className="flex gap-4 sm:items-start">
+                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-[#eadccf] bg-[#f7efe8]">
+                          {product.image?.url ? (
+                            <img
+                              src={product.image.url}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-[#9a7b5f]">
+                              No Image
+                            </div>
+                          )}
                         </div>
 
-                        <p className="mt-3 text-sm leading-7 text-[#6b5b52]">
-                          Supplied by{" "}
-                          <span className="font-medium text-[#2d1c13]">
-                            {product.supplierId?.name}
-                          </span>
-                          . {product.description}
-                        </p>
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-xl font-semibold text-[#1f140f]">
+                              {product.name}
+                            </h2>
+                            <span className="rounded-full bg-[#f3e8dc] px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-[#7a5a43]">
+                              {product.category}
+                            </span>
+                          </div>
+
+                          <p className="mt-3 text-sm leading-7 text-[#6b5b52]">
+                            Supplied by{" "}
+                            <span className="font-medium text-[#2d1c13]">
+                              {product.supplierId?.name}
+                            </span>
+                            . {product.description}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="sm:text-right">
                         <p className="text-sm text-[#8b7768]">Unit Price</p>
                         <p className="mt-1 text-2xl font-semibold text-[#1f140f]">
-                          €{product.price.toFixed(2)}
+                          €{Number(product.price || 0).toFixed(2)}
                         </p>
                       </div>
                     </div>
