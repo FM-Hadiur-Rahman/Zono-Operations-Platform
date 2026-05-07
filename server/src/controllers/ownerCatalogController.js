@@ -3,6 +3,42 @@ import Product from "../models/Product.js";
 
 const roundMoney = (value) => Number((value || 0).toFixed(2));
 
+const formatSupplier = (supplier) => ({
+  _id: supplier._id,
+  name: supplier.name,
+  code: supplier.code,
+  email: supplier.email,
+  orderMethod: supplier.orderMethod,
+  deliveryDays: supplier.deliveryDays || [],
+  minimumOrderAmount: roundMoney(supplier.minimumOrderAmount || 0),
+  isActive: supplier.isActive,
+  createdAt: supplier.createdAt,
+});
+
+const formatProduct = (product) => ({
+  _id: product._id,
+  name: product.name,
+  sku: product.sku,
+  category: product.category,
+  description: product.description,
+  unit: product.unit,
+  price: roundMoney(product.price || 0),
+  currency: product.currency || "EUR",
+  image: product.image || { url: "", publicId: "" },
+  isAvailable: product.isAvailable,
+  isActive: product.isActive,
+  createdAt: product.createdAt,
+  supplierId: product.supplierId
+    ? {
+        _id: product.supplierId._id,
+        name: product.supplierId.name,
+        code: product.supplierId.code,
+        email: product.supplierId.email,
+        orderMethod: product.supplierId.orderMethod,
+      }
+    : null,
+});
+
 export const getOwnerSuppliers = async (req, res) => {
   const companyId = req.user.companyId;
 
@@ -15,17 +51,7 @@ export const getOwnerSuppliers = async (req, res) => {
   res.status(200).json({
     success: true,
     count: suppliers.length,
-    suppliers: suppliers.map((supplier) => ({
-      _id: supplier._id,
-      name: supplier.name,
-      code: supplier.code,
-      email: supplier.email,
-      orderMethod: supplier.orderMethod,
-      deliveryDays: supplier.deliveryDays || [],
-      minimumOrderAmount: roundMoney(supplier.minimumOrderAmount || 0),
-      isActive: supplier.isActive,
-      createdAt: supplier.createdAt,
-    })),
+    suppliers: suppliers.map(formatSupplier),
   });
 };
 
@@ -70,17 +96,7 @@ export const createOwnerSupplier = async (req, res) => {
   res.status(201).json({
     success: true,
     message: "Supplier created successfully",
-    supplier: {
-      _id: supplier._id,
-      name: supplier.name,
-      code: supplier.code,
-      email: supplier.email,
-      orderMethod: supplier.orderMethod,
-      deliveryDays: supplier.deliveryDays || [],
-      minimumOrderAmount: roundMoney(supplier.minimumOrderAmount || 0),
-      isActive: supplier.isActive,
-      createdAt: supplier.createdAt,
-    },
+    supplier: formatSupplier(supplier),
   });
 };
 
@@ -133,17 +149,7 @@ export const updateOwnerSupplier = async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Supplier updated successfully",
-    supplier: {
-      _id: supplier._id,
-      name: supplier.name,
-      code: supplier.code,
-      email: supplier.email,
-      orderMethod: supplier.orderMethod,
-      deliveryDays: supplier.deliveryDays || [],
-      minimumOrderAmount: roundMoney(supplier.minimumOrderAmount || 0),
-      isActive: supplier.isActive,
-      createdAt: supplier.createdAt,
-    },
+    supplier: formatSupplier(supplier),
   });
 };
 
@@ -157,28 +163,7 @@ export const getOwnerProducts = async (req, res) => {
   res.status(200).json({
     success: true,
     count: products.length,
-    products: products.map((product) => ({
-      _id: product._id,
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      description: product.description,
-      unit: product.unit,
-      price: roundMoney(product.price || 0),
-      currency: product.currency || "EUR",
-      isAvailable: product.isAvailable,
-      isActive: product.isActive,
-      createdAt: product.createdAt,
-      supplierId: product.supplierId
-        ? {
-            _id: product.supplierId._id,
-            name: product.supplierId.name,
-            code: product.supplierId.code,
-            email: product.supplierId.email,
-            orderMethod: product.supplierId.orderMethod,
-          }
-        : null,
-    })),
+    products: products.map(formatProduct),
   });
 };
 
@@ -232,6 +217,7 @@ export const createOwnerProduct = async (req, res) => {
   }
 
   const parsedPrice = Number(price);
+
   if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
     res.status(400);
     throw new Error("Invalid product price");
@@ -247,6 +233,15 @@ export const createOwnerProduct = async (req, res) => {
     unit: unit.trim(),
     price: parsedPrice,
     currency,
+    image: req.file
+      ? {
+          url: req.file.path,
+          publicId: req.file.filename,
+        }
+      : {
+          url: "",
+          publicId: "",
+        },
     isAvailable: true,
     isActive: true,
   });
@@ -259,28 +254,7 @@ export const createOwnerProduct = async (req, res) => {
   res.status(201).json({
     success: true,
     message: "Product created successfully",
-    product: {
-      _id: createdProduct._id,
-      name: createdProduct.name,
-      sku: createdProduct.sku,
-      category: createdProduct.category,
-      description: createdProduct.description,
-      unit: createdProduct.unit,
-      price: roundMoney(createdProduct.price || 0),
-      currency: createdProduct.currency || "EUR",
-      isAvailable: createdProduct.isAvailable,
-      isActive: createdProduct.isActive,
-      createdAt: createdProduct.createdAt,
-      supplierId: createdProduct.supplierId
-        ? {
-            _id: createdProduct.supplierId._id,
-            name: createdProduct.supplierId.name,
-            code: createdProduct.supplierId.code,
-            email: createdProduct.supplierId.email,
-            orderMethod: createdProduct.supplierId.orderMethod,
-          }
-        : null,
-    },
+    product: formatProduct(createdProduct),
   });
 };
 
@@ -338,10 +312,12 @@ export const updateOwnerProduct = async (req, res) => {
 
   if (price !== undefined) {
     const parsedPrice = Number(price);
+
     if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
       res.status(400);
       throw new Error("Invalid product price");
     }
+
     product.price = parsedPrice;
   }
 
@@ -356,6 +332,13 @@ export const updateOwnerProduct = async (req, res) => {
   product.isActive =
     typeof isActive === "boolean" ? isActive : product.isActive;
 
+  if (req.file) {
+    product.image = {
+      url: req.file.path,
+      publicId: req.file.filename,
+    };
+  }
+
   await product.save();
 
   const updatedProduct = await Product.findById(product._id).populate(
@@ -366,27 +349,6 @@ export const updateOwnerProduct = async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Product updated successfully",
-    product: {
-      _id: updatedProduct._id,
-      name: updatedProduct.name,
-      sku: updatedProduct.sku,
-      category: updatedProduct.category,
-      description: updatedProduct.description,
-      unit: updatedProduct.unit,
-      price: roundMoney(updatedProduct.price || 0),
-      currency: updatedProduct.currency || "EUR",
-      isAvailable: updatedProduct.isAvailable,
-      isActive: updatedProduct.isActive,
-      createdAt: updatedProduct.createdAt,
-      supplierId: updatedProduct.supplierId
-        ? {
-            _id: updatedProduct.supplierId._id,
-            name: updatedProduct.supplierId.name,
-            code: updatedProduct.supplierId.code,
-            email: updatedProduct.supplierId.email,
-            orderMethod: updatedProduct.supplierId.orderMethod,
-          }
-        : null,
-    },
+    product: formatProduct(updatedProduct),
   });
 };

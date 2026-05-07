@@ -8,6 +8,7 @@ import {
   updateOwnerProduct,
 } from "../controllers/ownerCatalogController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
+import uploadProductImage from "../middlewares/uploadProductImage.js";
 
 const router = express.Router();
 
@@ -18,7 +19,17 @@ router.post("/suppliers", createOwnerSupplier);
 router.put("/suppliers/:id", updateOwnerSupplier);
 
 router.get("/products", getOwnerProducts);
-router.post("/products", createOwnerProduct);
-router.put("/products/:id", updateOwnerProduct);
+
+router.post(
+  "/products",
+  uploadProductImage.single("image"),
+  createOwnerProduct,
+);
+
+router.put(
+  "/products/:id",
+  uploadProductImage.single("image"),
+  updateOwnerProduct,
+);
 
 export default router;
