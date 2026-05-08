@@ -36,16 +36,14 @@ export default function OrdersPage() {
     loadOrders();
   }, []);
 
+  const subtitle =
+    user?.role === "owner"
+      ? "Review all orders across the company and inspect supplier splits."
+      : "Review your branch orders and supplier split details.";
+
   if (loading) {
     return (
-      <ManagerLayout
-        title="Orders"
-        subtitle={
-          user?.role === "owner"
-            ? "Review all orders across the company and inspect supplier splits."
-            : "Review your branch orders and supplier split details."
-        }
-      >
+      <ManagerLayout title="Orders" subtitle={subtitle}>
         <div className="rounded-[32px] border border-white/40 bg-white/75 p-8 text-[#6b5b52] shadow-[0_20px_80px_rgba(49,31,18,0.12)] backdrop-blur-xl">
           Loading orders...
         </div>
@@ -55,14 +53,7 @@ export default function OrdersPage() {
 
   if (error) {
     return (
-      <ManagerLayout
-        title="Orders"
-        subtitle={
-          user?.role === "owner"
-            ? "Review all orders across the company and inspect supplier splits."
-            : "Review your branch orders and supplier split details."
-        }
-      >
+      <ManagerLayout title="Orders" subtitle={subtitle}>
         <div className="rounded-[32px] border border-red-200 bg-red-50 p-8 text-red-700 shadow-sm">
           {error}
         </div>
@@ -71,14 +62,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <ManagerLayout
-      title="Orders"
-      subtitle={
-        user?.role === "owner"
-          ? "Review all orders across the company and inspect supplier splits."
-          : "Review your branch orders and supplier split details."
-      }
-    >
+    <ManagerLayout title="Orders" subtitle={subtitle}>
       <div className="rounded-[32px] border border-white/40 bg-white/75 p-6 shadow-[0_20px_80px_rgba(49,31,18,0.12)] backdrop-blur-xl sm:p-8">
         <div className="space-y-5">
           {orders.length === 0 ? (
@@ -99,14 +83,17 @@ export default function OrdersPage() {
                       <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#9a7b5f]">
                         {order.orderNumber}
                       </p>
+
                       <h2 className="mt-2 text-2xl font-semibold text-[#1f140f]">
                         {order.location?.name || "Unknown Location"}
                       </h2>
+
                       <p className="mt-2 text-sm text-[#6b5b52]">
                         {order.location?.city || "Germany"} · Qty{" "}
-                        {order.totalQuantity}· €
+                        {order.totalQuantity} · €
                         {Number(order.subtotalAmount || 0).toFixed(2)}
                       </p>
+
                       <p className="mt-1 text-sm text-[#8b7768]">
                         {new Date(order.createdAt).toLocaleString()}
                       </p>
@@ -131,7 +118,7 @@ export default function OrdersPage() {
                   {isExpanded && (
                     <div className="mt-5 border-t border-[#f0e3d7] pt-5">
                       <div className="grid gap-4 md:grid-cols-2">
-                        {order.supplierOrders.length === 0 ? (
+                        {(order.supplierOrders || []).length === 0 ? (
                           <div className="rounded-2xl border border-[#f0e3d7] bg-[#fffdfa] p-4 text-sm text-[#6b5b52]">
                             No supplier orders found for this order.
                           </div>
@@ -141,15 +128,17 @@ export default function OrdersPage() {
                               key={supplierOrder.id}
                               className="rounded-2xl border border-[#f0e3d7] bg-[#fffdfa] p-4"
                             >
-                              <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start justify-between gap-4 border-b border-[#f0e3d7] pb-4">
                                 <div>
                                   <p className="font-semibold text-[#2d1c13]">
                                     {supplierOrder.supplier?.name ||
                                       "Unknown Supplier"}
                                   </p>
+
                                   <p className="mt-1 text-sm text-[#8b7768]">
                                     {supplierOrder.supplierOrderNumber}
                                   </p>
+
                                   <p className="mt-1 text-sm text-[#8b7768]">
                                     Qty: {supplierOrder.totalQuantity}
                                   </p>
@@ -162,10 +151,71 @@ export default function OrdersPage() {
                                       supplierOrder.subtotalAmount || 0,
                                     ).toFixed(2)}
                                   </p>
+
                                   <p className="mt-1 text-sm text-[#8b7768]">
                                     {supplierOrder.status}
                                   </p>
                                 </div>
+                              </div>
+
+                              <div className="mt-4 space-y-3">
+                                {(supplierOrder.items || []).length === 0 ? (
+                                  <p className="text-sm text-[#8b7768]">
+                                    No items found.
+                                  </p>
+                                ) : (
+                                  supplierOrder.items.map((item) => {
+                                    const product =
+                                      item.productId || item.product || item;
+
+                                    return (
+                                      <div
+                                        key={item._id || product._id}
+                                        className="flex gap-4 rounded-2xl border border-[#f0e3d7] bg-white/80 p-3"
+                                      >
+                                        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-[#eadccf] bg-[#f7efe8]">
+                                          {product.image?.url ? (
+                                            <img
+                                              src={product.image.url}
+                                              alt={product.name}
+                                              className="h-full w-full object-cover"
+                                            />
+                                          ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-[#9a7b5f]">
+                                              No Image
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <div className="flex-1">
+                                          <h4 className="font-semibold text-[#2d1c13]">
+                                            {product.name || item.name}
+                                          </h4>
+
+                                          <p className="mt-1 text-sm text-[#8b7768]">
+                                            Qty: {item.quantity || item.qty} ·{" "}
+                                            {product.unit || item.unit}
+                                          </p>
+
+                                          <p className="mt-1 text-sm font-semibold text-[#1f140f]">
+                                            €
+                                            {Number(
+                                              item.lineTotal ||
+                                                item.total ||
+                                                (item.quantity ||
+                                                  item.qty ||
+                                                  0) *
+                                                  (item.unitPrice ||
+                                                    item.price ||
+                                                    product.price ||
+                                                    0),
+                                            ).toFixed(2)}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                )}
                               </div>
                             </div>
                           ))
