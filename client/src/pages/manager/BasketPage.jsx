@@ -138,21 +138,40 @@ export default function BasketPage() {
                             className="rounded-2xl border border-[#f0e3d7] bg-[#fffdfa] p-4"
                           >
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                              <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-[#2d1c13]">
-                                  {item.name}
-                                </h3>
-                                <p className="mt-2 text-sm leading-7 text-[#6b5b52]">
-                                  Ready for branch purchasing and structured
-                                  supplier dispatch.
-                                </p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  <span className="rounded-full border border-[#e7d7c8] bg-[#fcf8f4] px-3 py-1 text-sm text-[#7d6b60]">
-                                    {item.category}
-                                  </span>
-                                  <span className="rounded-full border border-[#e7d7c8] bg-[#fcf8f4] px-3 py-1 text-sm text-[#7d6b60]">
-                                    {item.unit}
-                                  </span>
+                              <div className="flex gap-4 sm:items-start">
+                                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-[#eadccf] bg-[#f7efe8]">
+                                  {item.image?.url ? (
+                                    <img
+                                      src={item.image.url}
+                                      alt={item.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-[#9a7b5f]">
+                                      No Image
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-semibold text-[#2d1c13]">
+                                    {item.name}
+                                  </h3>
+
+                                  <p className="mt-2 text-sm leading-7 text-[#6b5b52]">
+                                    Ready for branch purchasing and structured
+                                    supplier dispatch.
+                                  </p>
+
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    <span className="rounded-full border border-[#e7d7c8] bg-[#fcf8f4] px-3 py-1 text-sm text-[#7d6b60]">
+                                      {item.category}
+                                    </span>
+
+                                    <span className="rounded-full border border-[#e7d7c8] bg-[#fcf8f4] px-3 py-1 text-sm text-[#7d6b60]">
+                                      {item.unit}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -161,7 +180,7 @@ export default function BasketPage() {
                                   Unit Price
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-[#1f140f]">
-                                  €{item.price.toFixed(2)}
+                                  €{Number(item.price || 0).toFixed(2)}
                                 </p>
                               </div>
                             </div>
