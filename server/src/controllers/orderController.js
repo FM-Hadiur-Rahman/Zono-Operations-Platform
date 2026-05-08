@@ -252,7 +252,9 @@ export const getOrders = async (req, res) => {
 
   const supplierOrders = await SupplierOrder.find({
     parentOrderId: { $in: orderIds },
-  }).populate("supplierId", "name code email orderMethod");
+  })
+    .populate("supplierId", "name code email orderMethod")
+    .populate("items.productId", "name sku category unit price image");
 
   const groupedSupplierOrders = supplierOrders.reduce((acc, supplierOrder) => {
     const key = String(supplierOrder.parentOrderId);
@@ -300,6 +302,19 @@ export const getOrders = async (req, res) => {
               orderMethod: supplierOrder.supplierId.orderMethod,
             }
           : null,
+
+        items: supplierOrder.items.map((item) => ({
+          productId: item.productId?._id || item.productId,
+          name: item.productId?.name || item.name,
+          sku: item.productId?.sku || item.sku,
+          category: item.productId?.category || "",
+          unit: item.productId?.unit || item.unit,
+          image: item.productId?.image || { url: "", publicId: "" },
+          quantity: item.quantity,
+          unitPrice: roundMoney(item.unitPrice),
+          lineTotal: roundMoney(item.lineTotal),
+        })),
+
         totalItems: supplierOrder.totalItems,
         totalQuantity: supplierOrder.totalQuantity,
         subtotalAmount: roundMoney(supplierOrder.subtotalAmount),
